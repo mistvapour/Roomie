@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+    <meta charset="UTF-8"> 
+    <head>
+        <title>房间管理</title>       
+         
+        <script type="text/javascript" src="dhtmlx/codebase/suite.js"></script>
+        <link rel="stylesheet" href="dhtmlx/codebase/suite.css">
+        <script type="text/javascript" src="Room/roomdataset.json"></script>
+    </head>
+    <body>
+        <div id="tabbar_container"></div>
+        <script>
+            var tabbar = new dhx.Tabbar("tabbar_container",{
+                mode: "top",
+                views:[ 
+                { tab: "房间管理", id:"myroom",css:"panel flex"},
+                    
+                ]
+            });
+            var myroom = new dhx.Layout("layout", {
+                css: "dhx_layout-cell--bordered",
+                cols: [
+                    {
+                        rows: [
+                            {
+                                id: "bar",
+                                css: "dhx_layout-cell--border_right",
+                            },
+                            {
+                                rows: [
+                                    {
+                                        id: "tree",                   
+                                        css: "dhx_layout-cell--border_right",
+                                        height:800
+                                    }
+                                ]
+                            },
+                        ]
+                    },
+                    {
+                        rows: [
+                            {
+                                id:"tool",
+                                css: "dhx_layout-cell--border_left"
+                            },
+                            {
+                                id: "grid",
+                                css: "layout-content layout-rightbar",
+                                height:900
+                            }
+                        ]
+                    },
+                ]
+            }); 
+            tabbar.getCell("myroom").attach(myroom);
+            
+           var data1 =[ 
+            {
+                "type": "input",
+                "placeholder":"输入机构名称",
+                "width":150,
+                "icon": "dxi dxi-magnify"
+            },
+            {
+                "id":"addbuiding",
+                "type": "button",
+                "icon": "dxi dxi-plus",
+                "value": "添加",
+                "tooltip": "create new item"
+            },
+            {
+                "id":"deletebuiding",
+                "type": "button",
+                "value":"删除",
+                "tooltip": "",
+                "icon": "dxi dxi-delete",
+                "active": true,
+            },
+            {
+                "id": "edit",
+                "value": "修改",
+                "type":"button",
+                "icon": "dxi dxi-pencil",
+                "twoState": true,
+                "active": true,
+            }
+        ];
+        var data2 =[ 
+            {
+                "id":"fresh",
+                "type": "htmlbutton",
+                "value":"刷新"
+            },
+            {
+                "id":"addroom",
+                "icon": "dxi dxi-plus",
+                "value": "添加",
+                "tooltip": "create new item",
+                "type": "htmlbutton"
+            },
+            {
+                "id":"deleteroom",
+                "type":"htmlbutton",
+                "value":"删除",
+                "tooltip": "",
+                "icon": "dxi dxi-delete"
+            }
+        ];
+            var bar = new dhx.Toolbar("toolbar", {css:"dhx_toolbar--bordered"});
+            bar.data.parse(data1);
+            bar.events.on("Click", function(id){
+                console.log(bar);
+            });
+            myroom.getCell("bar").attach(bar);    
+
+            var tool = new dhx.Toolbar("toolbar", {css:"dhx_toolbar--bordered"});
+            tool.data.parse(data2);
+            tool.events.on("Click", function(id){
+                console.log("tool");
+            });
+            myroom.getCell("tool").attach(tool);   
+            tool.events.on("Click", function(id,e){
+                selectWindow.show();
+            });
+            var selectWindow = new dhx.Window({width: 800, height: 400, title: "添加房间信息", modal: true});
+            var form = new dhx.Form(null, {
+                css: "dhx_widget--bordered",
+                padding: "30",
+                rows: [
+                    {
+                        cols:[
+                            {
+                                type: "input",
+                                label: "房间号",
+                                value: "",
+                                width:100,
+                                validation: function(value) {
+                                    return value !== "";
+                                },
+                                id: "roomname",
+                                name: "roomname"
+                            }
+                        ]
+                    },
+                    {
+                        cols:[
+                            {
+                                type: "select",
+                                label: "房间类型",
+                                labelPosition: "left",
+                                labelWidth: "100px",
+                                value: "",
+                                validation: function(value) {
+                                    return value !== "";
+                                },
+                                id: "roomselect",
+                                name: "selecttype",
+                                options: [
+                                    {
+                                        value: "",
+                                        content: ""
+                                    },
+                                    {
+                                        value: "11",
+                                        content:"会议室"
+                                    },
+                                    {
+                                        value: "12",
+                                        content: "教室"
+                                    },
+                                    {
+                                        value: "13",
+                                        content: "机房"
+                                    },
+                                    {
+                                        value: "14",
+                                        content: "实验室"
+                                    }
+                                ]
+                            },
+                            {
+                                type: "select",
+                                label: "可容纳人数",
+                                labelPosition: "left",
+                                labelWidth: "100px",
+                                value: "",
+                                validation: function(value) {
+                                    return value !== "";
+                                },
+                                id: "roomnumber",
+                                name: "roomnumber",
+                                options: [
+                                    {
+                                        value: "",
+                                        content: ""
+                                    },
+                                    {
+                                        value: "21",
+                                        content: "10-25"
+                                    },
+                                    {
+                                        value: "22",
+                                        content: "25-50"
+                                    },
+                                    {
+                                        value: "23",
+                                        content: "50-100"
+                                    },
+                                    {
+                                        value: "24",
+                                        content: "100-150"
+                                    },
+                                    {
+                                        value: "25",
+                                        content: "150+"
+                                    }
+                                ]
+                            },
+                            {
+                                type: "input",
+                                label: "自定义条件",
+                                required: true,
+                                labelPosition: "left",
+                                labelWidth: "100px",
+                                id: "free",
+                                name: "free"
+                            }
+                        ]
+                    },
+                    {
+                        cols:[
+                            {
+                                type: "input",
+                                label: "电脑个数",
+                                required: true,
+                                labelPosition: "left",
+                                labelWidth: "100px",
+                                id: "computer",
+                                name: "computer"
+                            },
+                            {
+                                type: "input",
+                                label: "空调个数",
+                                required: true,
+                                labelPosition: "left",
+                                labelWidth: "100px",
+                                id: "kongtiao",
+                                name: "kongtiao"
+                            },
+                            {
+                                type: "input",
+                                label: "投影仪个数",
+                                required: true,
+                                labelPosition: "left",
+                                labelWidth: "100px",
+                                id: "touying",
+                                name: "touying"
+                            },
+                        ]  
+                    },
+                    {
+                        align: "确定",
+                        cols: [
+                            {
+                                gravity: false,
+                                type: "button",
+                                submit: true,
+                                value: "确定",
+                                size: "medium",
+                                view: "flat",
+                                color: "primary",
+                                id: "button",
+                                name: "button"
+                            }
+                        ]
+                    }
+                ]
+            });
+            selectWindow.attach(form);        
+
+            var tree = new dhx.Tree("tree_container");
+            tree.data.load("http://localhost/Room/treedata.json").then(function() {
+                myroom.getCell("tree").attach(tree);
+            });
+            myroom.cell("tree").collapse();
+            
+            var grid = new dhx.Grid("grid_container", {
+                /*columns: [
+                    { width: 160, id: "roomname", header: [{ text: "房间号" }, { content: "inputFilter" }] },
+                    { width: 160, id: "roomtype", header: [{ text: "房间类型" }, { content: "selectFilter" }], editorType: "select", options: ["会议室","教室","机房", "实验室"] },
+                    { width: 160, id: "ban", header: [{ text: "是否禁用", rowspan: 2 }], type: "boolean" },
+                    { width: 160, id: "roomnumber", header:[{ text: "可容纳人数" }, { content: "comboFilter" }], type: "string", editorType: "combobox", options: ["10-25", "25-50", "50-100","100-150","150+"] },
+                    { width: 160, id: "computer", header: [{ text: "电脑个数" }, { content: "inputFilter" }]},
+                    { width: 160, id: "touying", header: [{ text: "投影仪个数" }, { content: "inputFilter" }] },
+                    { width: 160, id: "kongtiao", header: [{ text: "空调个数" }, { content: "inputFilter" }]},
+                    { width: 160, id: "free", header: [{ text: "其他条件"},{ content: "inputFilter" }]},
+                ],*/
+                columns: [
+                    { width: 200, id: "project", header: [{ text: "房间号" }, { content: "inputFilter" }] },
+                    { width: 160, id: "status", header: [{ text: "房间类型" }, { content: "selectFilter" }], editorType: "select", options: ["会议室", "教室", "实验室","机房"] },
+                    { width: 160, id: "paid", header: [{ text: "是否禁用", rowspan: 2 }], type: "boolean" },
+                    { width: 200, id: "owner", header: [{ text: "可容纳人数" }, { content: "comboFilter" }], type: "string", editorType: "combobox", options: ["10-25", "25-50", "50-100","100-150","150+"] },
+                    { width: 160, id: "hours", header: [{ text: "电脑个数" }, { content: "inputFilter" }] },
+                    { width: 160, id: "renewals", header: [{ text: "投影仪个数" }, { content: "inputFilter" }] },
+                    { width: 160, id: "start_date", header: [{ text: "空调个数"}, { content: "inputFilter" }] },
+                    { width: 200, id: "end_date", header: [{ text: "其他条件" },{ content: "inputFilter" }] },
+                    /*{ width: 160, id: "cost", header: [{ text: "Cost" }, { content: "inputFilter" }] },
+                    { width: 160, id: "budget", header: [{ text: "Budget" }, { content: "inputFilter" }] },
+                    { width: 160, id: "balance", header: [{ text: "Balance" }, { content: "inputFilter" }] },*/
+                ], 
+                editable: true,
+                //data:roomdataset,
+            });
+            var selector = document.querySelectorAll("[name=editable]");
+            for (var index = 0; index < selector.length; index++) {
+                selector[index].addEventListener("change", function (e) {
+                    config.editable = (e.target.id === "true");
+                    createGrid();
+                });
+            }
+            myroom.getCell("grid").attach(grid);
+        </script>
+    </body>
+</html>

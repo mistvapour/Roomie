@@ -1,0 +1,148 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>用户界面</title>
+
+        <link href="css/jquery-ui.css" rel="stylesheet" />
+        <link href="css/jquery.ui.theme.css" rel="stylesheet" />
+        <link href="css/timelineScheduler.css" rel="stylesheet" />
+        <link href="css/timelineScheduler.styling.css" rel="stylesheet" />
+        <link href="css/calendar.css" rel="stylesheet" />
+         
+        <script src="js/moment.min.js"></script>
+        <script src="js/jquery-1.9.1.min.js"></script>
+        <script src="js/jquery-ui-1.10.2.min.js"></script>
+        <script src="js/timelineScheduler.js"></script>
+        <script src="js/calendar1.js"></script>
+
+        <script type="text/javascript" src="dhtmlx/codebase/suite.js?v=6.4.1"></script>
+        <link rel="stylesheet" href="dhtmlx/codebase/suite.css?v=6.4.1">
+
+        <style>
+            *{
+                margin:0;
+                padding:0;
+            }
+            body{height:100%}
+        </style>
+        
+    </head>
+    <body>
+        <script>
+        //变量命名规则为驼峰，对应的ID采取下划线命名
+
+
+
+        $(document).ready(
+
+            function(){
+                prev();
+                init();
+            }
+        );
+        
+        function prev(){
+            var calendar;
+            $.getJSON("data/timelineData1.json", function(data){
+                Calendar.Sections = data;
+            });
+            $(document).ready(Calendar.Init);
+        };
+          
+
+        function init(){
+            
+            //先建变量
+            
+            var tabbarPage = new dhx.Tabbar("tabbar_page", {      //页面的tabbar
+                height:"100%",
+                views:[
+                    { tab: "预定会议室", id: "reserve_Mtr"},
+                    { tab: "我的日程", id: "myScd"},
+                    { tab: "课表查看"}
+                ]
+            });
+
+            var layoutReserve = new dhx.Layout("layout_reserve",{       //reserveMeeetingroom的tab
+                height:"100%",
+                cols: [
+                    {
+                        id: "sidebar",
+                        collapsable: "true",
+                        gravity: false,
+                        css: "dhx_layout-cell--border_right",
+                        width: "15%",
+                        height:"auto"
+                    },
+                    {
+                        rows:[
+                            {
+                                id: "toolbar"
+                                //css: "dhx_layout-cell--border_left",
+                                
+                            },
+                            {
+                                id: "content",
+                                css: "dhx_layout-cell--border_left",
+                                html: "<div class='calendar'></div><div class='realtime-info'></div>",
+                                width: "800px"
+                            }
+                        ]
+                    },
+                ]
+            });
+
+            
+
+            tabbarPage.getCell("reserve_Mtr").attach(layoutReserve); 
+
+            var treeOrg = new dhx.Tree("tree_org");  //组织部门的树
+
+            //进行数据加载与节点连接
+
+            treeOrg.data.load("test.json").then(function() {
+                
+                layoutReserve.cell("sidebar").collapse();
+            });
+
+             
+
+            layoutReserve.getCell("sidebar").attach(treeOrg);
+            var toolbarReserve = new dhx.Toolbar("toolbar_reserve", {    //工具栏
+                //css: "dhx_widget--bordered dhx_widget--bg_gray"
+            });
+
+            layoutReserve.getCell("toolbar").attach(toolbarReserve);
+            toolbarReserve.data.load("data/toolbardata1.json");
+
+
+            toolbarReserve.events.on("Click", function(id,e){
+                switch(id){
+                    case "searchWindowAdv":
+                    searchWindowAdv.show();
+                    break;
+                    case "searchWindow":
+                    searchWindow.show();
+                    break;
+                    case "reserveWindow":
+                    reserveWindow.show();
+                    break;
+                    case "reserveWindowAdv":
+                    reserveWindowAdv.show();
+                    break;
+                    default:break;
+                }   
+            });
+
+             
+
+                    
+        };
+
+
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>用户界面</title>
+
+    <link href="css/jquery-ui.css" rel="stylesheet" />
+    <link href="css/jquery.ui.theme.css" rel="stylesheet" />
+    <link href="css/timelineScheduler.css" rel="stylesheet" />
+    <link href="css/timelineScheduler.styling.css" rel="stylesheet" />
+    <link href="css/calendar.css" rel="stylesheet" />
+     
+    <script src="js/moment.min.js"></script>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/jquery-ui-1.10.2.min.js"></script>
+    <script src="js/timelineScheduler.js"></script>
+    <script src="js/calendar3.js"></script>
+
+    <script type="text/javascript" src="dhtmlx/codebase/suite.js?v=6.4.1"></script>
+    <link rel="stylesheet" href="dhtmlx/codebase/suite.css?v=6.4.1">
+
+</head>
+<body>
+    <section >
+    	<div id="tabbar"></div>
+    </section>
+
+    <script>    
+  //  $_POST = json_decode(file_get_contents('php://input'), true);    
+        var tabbar = new dhx.Tabbar("tabbar", {
+            mode: "top",
+            css: "dhx_widget--bordered",
+            height:  "100%",
+            views:[
+                { tab: "预定会议室", id: "reserveMtr"},
+                { tab: "我的日程", id: "myScd"},
+                { tab: "课表查看"}
+            ]
+        });
+
+        var reserveMtr = new dhx.Layout("layout",{
+            cols: [
+                {
+                    id: "sidebar",
+                    collapsable: "true",
+                    header: "华东师范大学",//所属机构名
+                    gravity: false,
+                    css: "dhx_layout-cell--border_right",
+                    width: "15%",
+                    height:"580px"
+                },
+                {
+                	rows:[
+                	    {
+                	    	id: "toolbar",
+                	    	css: "dhx_layout-cell--border_left",
+                	    	
+                	    },
+                	    {
+                	    	id: "content",
+		                    css: "dhx_layout-cell--border_left",
+		                    html: "<div  class='calendar'></div><div class='realtime-info'></div>",
+		                    width: "1000px",
+		                    height: "580px",
+		                    gravity:false
+                	    }
+                	]
+                },
+            ]
+        });
+        
+        tabbar.getCell("reserveMtr").attach(reserveMtr);
+        
+
+        var tree = new dhx.Tree("tree_container");
+
+        tree.data.load("test.json").then(function() {
+            reserveMtr.getCell("sidebar").attach(tree);
+            reserveMtr.cell("sidebar").collapse();
+        });
+
+        
+        reserveMtr.getCell("sidebar").attach(tree);
+        var toolbar = new dhx.Toolbar("toolbar", {
+			css: "dhx_widget--bordered dhx_widget--bg_gray"
+		});
+		toolbar.data.load("data/toolbardata1.json");
+		reserveMtr.getCell("toolbar").attach(toolbar);
+        
+
+        toolbar.events.on("Click", function(id,e){
+        	switch(id){
+        		case "searchWindowAdv":
+        		searchWindowAdv.show();
+        		break;
+        		case "searchWindow":
+        		searchWindow.show();
+        		break;
+        		case "reserveWindow":
+        		reserveWindow.show();
+        		break;
+        		case "reserveWindowAdv":
+        		reserveWindowAdv.show();
+        		break;
+        		default:break;
+        	}   
+		});
+
+        var searchWindowAdv = new dhx.Window({width: 800, height: 600, title: "高级查询", modal: true});
+        var reserveWindowAdv = new dhx.Window({width: 800, height: 600, title: "高级预定", modal: true});
+        var searchWindow = new dhx.Window({width: 500, height: 600, title: "查询", modal: true});
+        var reserveWindow = new dhx.Window({width: 500, height: 600, title: "预定", modal: true});
+
+  
+    /*    var form = new dhx.Form(null, {
+                css: "dhx_widget--bordered",
+                padding: "30"
+        });
+        form.data.load("data/test.json");*/
+        var formS  = new dhx.Form(null, {
+    	css: "dhx_widget--bordered",
+        padding: "30",
+        height:"400",
+        rows: [
+        {
+            width: "400px", // width for cols 
+                   type: "timepicker",
+                        controls: "true",
+                        label: "开始时间",
+                        required: true,
+                        labelPosition: "left",                   
+                        id: "timepickerBeg",
+                        name: "timepickerBeg"
+        },
+        {
+        	width: "400px",
+        	
+                        type: "timepicker",
+                        controls: "true",
+                        label: "结束时间",
+                        required: true,
+                        labelPosition: "left",                     
+                        id: "timepickerEnd",
+                        name: "timepickerEnd"
+            
+        },
+        {
+        	width:"400px",
+        	cols:[
+        	{
+                        type: "datepicker",
+                        label: "日期",
+                        required: true,
+                        labelPosition: "left",
+                        id: "datepickerBeg",
+                        name: "datepickerBeg"
+                    }
+        	]
+        },
+        {
+        	width:"400px",
+                        type: "select",
+                        label: "建筑物",
+                        labelPosition: "left",
+                        value: "",
+                        id: "selectBuild",
+                        name: "selectBuild",
+                        options: [
+                            {
+                                value: "",
+                                content: ""
+                            },
+                            {
+                                value: "1",
+                                content: "理科大楼"
+                            },
+                            {
+                                value: "2",
+                                content: "文史楼"
+                            },
+                            {
+                                value: "3",
+                                content: "田楼"
+                            }
+            
+        	]
+        },
+        {
+        	width:"400px",
+        	
+            	type: "select",
+                        label: "房间号",
+                        labelPosition: "left",
+                        value: "",
+                        id: "selectRoom",
+                        name: "selectRoom",
+                        options: [
+                            {
+                                value: "",
+                                content: ""
+                            },
+                            {
+                                value: "1",
+                                content: "127"
+                            },
+                            {
+                                value: "2",
+                                content: "325"
+                            },
+                            {
+                                value: "3",
+                                content: "702"
+                            }
+                        ]
+
+            
+        },
+        {
+                        align: "end",
+                        cols: [
+                            {
+                                gravity: false,
+                                type: "button",
+                                submit: true,
+                                value: "查询",
+                                size: "medium",
+                                view: "flat",
+                                color: "primary",
+                                id: "button",
+                                name: "button"
+                            }
+                        ]
+        }
+                    
+            
+    ]
+});
+
+        var formSA  = new dhx.Form(null, {
+    	css: "dhx_widget--bordered",
+        padding: "30",
+        height:"400",
+        rows: [
+        {
+        	align:"center",
+            width: "700px", // width for cols 
+            cols: [
+            {
+                        type: "timepicker",
+                        controls: "true",
+                        label: "开始时间",
+                        required: true,
+                        labelPosition: "left",                   
+                        id: "timepickerBeg",
+                        name: "timepickerBeg"
+                    },                  
+                    {
+                        type: "timepicker",
+                        controls: "true",
+                        label: "结束时间",
+                        required: true,
+                        labelPosition: "left",                     
+                        id: "timepickerEnd",
+                        name: "timepickerEnd"
+            }
+            ]
+        },
+        {
+                width: "700px", // width for cols 
+                cols: [
+                {
+                        type: "slider",
+                        label: "重复频率（天）",
+                        css: "slider",
+                        labelPosition: "left",
+                        labelWidth:"100px",
+                        min: 1,
+                        max: 7,
+                        id: "slider",
+                        name: "slider"
+                    }
+                ]
+        },
+        {
+        	width:"700px",
+        	cols:[
+        	{
+                        type: "datepicker",
+                        label: "开始日期",
+                        required: true,
+                        labelPosition: "left",
+                        id: "datepickerBeg",
+                        name: "datepickerBeg"
+                    },
+                    {
+                        type: "datepicker",
+                        label: "结束日期",
+                        required: true,
+                        labelPosition: "left",
+                        id: "datepickerEnd",
+                        name: "datepickerEnd"
+            }
+        	]
+        },
+        {
+        	width:"700px",
+        	cols:[
+        	{
+                        type: "select",
+                        label: "建筑物",
+                        labelPosition: "left",
+                        value: "",
+                        id: "selectBuild",
+                        name: "selectBuild",
+                        options: [
+                            {
+                                value: "",
+                                content: ""
+                            },
+                            {
+                                value: "1",
+                                content: "理科大楼"
+                            },
+                            {
+                                value: "2",
+                                content: "文史楼"
+                            },
+                            {
+                                value: "3",
+                                content: "田楼"
+                            }
+                        ]
+            },
+            {
+            	type: "select",
+                        label: "房间号",
+                        labelPosition: "left",
+                        value: "",
+                        id: "selectRoom",
+                        name: "selectRoom",
+                        options: [
+                            {
+                                value: "",
+                                content: ""
+                            },
+                            {
+                                value: "1",
+                                content: "127"
+                            },
+                            {
+                                value: "2",
+                                content: "325"
+                            },
+                            {
+                                value: "3",
+                                content: "702"
+                            }
+                        ]
+
+            }
+        	]
+        },
+        {
+                        align: "end",
+                        cols: [
+                            {
+                                gravity: false,
+                                type: "button",
+                                submit: true,
+                                value: "查询",
+                                size: "medium",
+                                view: "flat",
+                                color: "primary",
+                                id: "button",
+                                name: "button"
+                            }
+                        ]
+        }
+                    
+            
+    ]
+});
+    
+    var formRA  = new dhx.Form(null, {
+    	css: "dhx_widget--bordered",
+        padding: "30",
+        height:"400",
+        rows: [
+        {
+        	align:"center",
+            width: "700px", // width for cols 
+            cols: [
+            {
+                        type: "timepicker",
+                        controls: "true",
+                        label: "开始时间",
+                        required: true,
+                        labelPosition: "left",                   
+                        id: "timepickerBeg",
+                        name: "timepickerBeg"
+                    },                  
+                    {
+                        type: "timepicker",
+                        controls: "true",
+                        label: "结束时间",
+                        required: true,
+                        labelPosition: "left",                     
+                        id: "timepickerEnd",
+                        name: "timepickerEnd"
+            }
+            ]
+        },
+        {
+                width: "700px", // width for cols 
+                cols: [
+                {
+                        type: "slider",
+                        label: "重复频率（天）",
+                        css: "slider",
+                        labelPosition: "left",
+                        labelWidth:"100px",
+                        min: 1,
+                        max: 7,
+                        id: "slider",
+                        name: "slider"
+                    }
+                ]
+        },
+        {
+        	width:"700px",
+        	cols:[
+        	{
+                        type: "datepicker",
+                        label: "开始日期",
+                        required: true,
+                        labelPosition: "left",
+                        id: "datepickerBeg",
+                        name: "datepickerBeg"
+                    },
+                    {
+                        type: "datepicker",
+                        label: "结束日期",
+                        required: true,
+                        labelPosition: "left",
+                        id: "datepickerEnd",
+                        name: "datepickerEnd"
+            }
+        	]
+        },
+        {
+        	width:"700px",
+        	cols:[
+        	{
+                        type: "select",
+                        label: "建筑物",
+                        labelPosition: "left",
+                        value: "",
+                        id: "selectBuild",
+                        name: "selectBuild",
+                        options: [
+                            {
+                                value: "",
+                                content: ""
+                            },
+                            {
+                                value: "1",
+                                content: "理科大楼"
+                            },
+                            {
+                                value: "2",
+                                content: "文史楼"
+                            },
+                            {
+                                value: "3",
+                                content: "田楼"
+                            }
+                        ]
+            },
+            {
+            	type: "select",
+                        label: "房间号",
+                        labelPosition: "left",
+                        value: "",
+                        id: "selectRoom",
+                        name: "selectRoom",
+                        options: [
+                            {
+                                value: "",
+                                content: ""
+                            },
+                            {
+                                value: "1",
+                                content: "127"
+                            },
+                            {
+                                value: "2",
+                                content: "325"
+                            },
+                            {
+                                value: "3",
+                                content: "702"
+                            }
+                        ]
+
+            }
+        	]
+        },
+        {
+        	type: "select",
+            label: "出席群体",
+            labelPosition: "left",
+            value: "",
+            id: "participant",
+            name: "participant",
+            options: [
+                {
+                    value: "",
+                    content: ""
+                },
+                {
+                    value: "1",
+                    content: "18级计算机科学系本科生"
+                },
+                {
+                    value: "2",
+                    content: "自定义"
+                }
+            ]
+
+        },
+        {
+                        align: "end",
+                        cols: [
+                            {
+                                gravity: false,
+                                type: "button",
+                                submit: true,
+                                value: "预定",
+                                size: "medium",
+                                view: "flat",
+                                color: "primary",
+                                id: "button",
+                                name: "button"
+                            }
+                        ]
+        }
+                    
+            
+    ]
+});
+var formR  = new dhx.Form(null, {
+    	css: "dhx_widget--bordered",
+        padding: "30",
+        height:"400",
+        rows: [
+        {
+            width: "400px", // width for cols 
+                   type: "timepicker",
+                        controls: "true",
+                        label: "开始时间",
+                        required: true,
+                        labelPosition: "left",                   
+                        id: "timepickerBeg",
+                        name: "timepickerBeg"
+        },
+        {
+        	width: "400px",
+        	
+                        type: "timepicker",
+                        controls: "true",
+                        label: "结束时间",
+                        required: true,
+                        labelPosition: "left",                     
+                        id: "timepickerEnd",
+                        name: "timepickerEnd"
+            
+        },
+        {
+        	width:"400px",
+        	cols:[
+        	{
+                        type: "datepicker",
+                        label: "日期",
+                        required: true,
+                        labelPosition: "left",
+                        id: "datepickerBeg",
+                        name: "datepickerBeg"
+                    }
+        	]
+        },
+        {
+        	width:"400px",
+        	
+            	type: "select",
+                        label: "房间号",
+                        labelPosition: "left",
+                        value: "",
+                        id: "selectRoom",
+                        name: "selectRoom",
+                        options: [
+                            {
+                                value: "",
+                                content: ""
+                            },
+                            {
+                                value: "1",
+                                content: "127"
+                            },
+                            {
+                                value: "2",
+                                content: "325"
+                            },
+                            {
+                                value: "3",
+                                content: "702"
+                            }
+                        ]
+
+            
+        },
+        {
+                        align: "end",
+                        cols: [
+                            {
+                                gravity: false,
+                                type: "button",
+                                submit: true,
+                                value: "查询",
+                                size: "medium",
+                                view: "flat",
+                                color: "primary",
+                                id: "button",
+                                name: "button"
+                            }
+                        ]
+        },
+        {
+                        align: "end",
+                        cols: [
+                            {
+                                gravity: false,
+                                type: "button",
+                                submit: true,
+                                value: "预定",
+                                size: "medium",
+                                view: "flat",
+                                color: "primary",
+                                id: "button",
+                                name: "button"
+                            }
+                        ]
+        }
+                    
+            
+    ]
+});
+
+searchWindowAdv.attach(formSA);
+searchWindow.attach(formS);
+reserveWindowAdv.attach(formRA);
+reserveWindow.attach(formR);
+ 
+formR.events.on("buttonclick",function(id,e){
+
+var formdata=this.getValue();
+$.Ajax({
+    url:"Source/reservationdata.php",
+    type:"POST",
+    data:formdata,
+    success:function(data){
+        console.log("POST");
+        for(var i in data){
+            console.log(data[i]);                
+        }
+    }
+});
+alert("" + id +"：" + e);
+});
+ 
+</script>
+ 
+    	
+</body>
+</html>
+

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>用户界面</title>
+
+    <link href="css/jquery-ui.css" rel="stylesheet" />
+    <link href="css/jquery.ui.theme.css" rel="stylesheet" />
+    <link href="css/timelineScheduler.css" rel="stylesheet" />
+    <link href="css/timelineScheduler.styling.css" rel="stylesheet" />
+    <link href="css/calendar.css" rel="stylesheet" />
+     
+    <script src="js/moment.min.js"></script>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/jquery-ui-1.10.2.min.js"></script>
+    <script src="js/timelineScheduler.js"></script>
+    <script src="js/calendar3.js"></script>
+
+    <script type="text/javascript" src="dhtmlx/codebase/suite.js?v=6.4.1"></script>
+    <link rel="stylesheet" href="dhtmlx/codebase/suite.css?v=6.4.1">
+
+    <script src="dhtmlx/scheduler/codebase/dhtmlxscheduler.js?v=5.3.5" type="text/javascript" charset="utf-8"></script>
+	<link rel="stylesheet" href="dhtmlx/scheduler/codebase/dhtmlxscheduler_material.css?v=5.3.5" type="text/css" charset="utf-8">
+
+
+</head>
+<body>
+ 
+
+ <section class="dhx_sample-container">
+            <div id="tabbar"></div>
+ </section>
+
+            <script>
+        var tabbar;
+        
+         
+        function createTabbar(mode) {
+
+                tabbar = new dhx.Tabbar("tabbar", {
+                    mode: mode,
+                    css: "dhx_widget--bordered",
+                    views:[
+					
+					
+                    { tab: "订会议室", id: "reserve"},
+                    { tab: "日程查看", id: "layout2"},
+                    { tab: "课表查看", id: "timetable"},
+                   
+				]
+                    
+                });
+            }
+            createTabbar("top");
+
+         //tabbar.setHrefMode("iframes"); 
+         var reserveMtr = new dhx.Layout("layout",{
+            css: "dhx_layout-cell--bordered",
+            cols: [
+                {
+                    id: "sidebar1",
+                    collapsable: "true",
+                    header: "华东师范大学",//所属机构名
+                    gravity: false,
+                    css: "dhx_layout-cell--border_right",
+                    width: "15%",
+                    height:"580px"
+                },
+                {
+                	rows:[
+                	    {
+                	    	id: "toolbar1",
+                	    	css: "dhx_layout-cell--border_left",
+                	    	
+                	    },
+                	    {
+                	    	id: "content1",
+		                    css: "dhx_layout-cell--border_left",
+		                    html: "<div  class='calendar'></div><div class='realtime-info'></div>",
+		                    width: "1000px",
+		                    height: "580px",
+		                    gravity:false
+                	    }
+                	]
+                },
+            ]
+        });
+        tabbar.cell("reserve").attach(reserveMtr);
+        
+        var tree = new dhx.Tree("tree_container");
+
+        tree.data.load("data/treeData.json").then(function() {
+            reserveMtr.getCell("sidebar1").attach(tree);
+            reserveMtr.cell("sidebar1").collapse();
+        });
+
+        
+        reserveMtr.getCell("sidebar1").attach(tree);
+        var toolbar1 = new dhx.Toolbar("toolbar", {
+			css: "dhx_widget--bordered dhx_widget--bg_gray"
+		});
+		toolbar1.data.load("data/toolBardata.json");
+		reserveMtr.getCell("toolbar1").attach(toolbar1);
+        
+
+	
+        var config = {
+            css: "dhx_layout-cell--bordered",
+
+            cols: [
+                  //  align:"center",
+                {
+                    id: "sidebar2",
+                    gravity: false,
+                    css: "dhx_layout-cell--border_right",
+                    width: "200px",
+                    height:"1000px"
+                },
+                {
+                    rows: [{
+                        id: "content2",
+                        css: "dhx_layout-cell--border_left",
+                        width: "auto",
+
+                        height:"1000px",
+                       // html:"<div id='scheduler_here' class='dhx_cal_container' style='width:100%; height:100%'>"
+                    },]
+                },
+            ]
+        };   
+      var lay2 = new dhx.Layout("layout_container", config);
+      tabbar.cell("layout2").attach(lay2);
+      //var scheduler1= new scheduler('scheduler_here',new Date(2018,0,1),"week"));
+       
+           
+			//scheduler.config.readonly = true;
+            scheduler.attachEvent("onSchedulerReady", function () {
+                requestAnimationFrame(function(){
+                    // here you can set the initial view and date and load the data
+                    scheduler.setCurrentView(new Date(2020,3,2), "week");
+                    scheduler.load("data/events.json");
+                });
+            
+            });
+            var tree2 = new dhx.Tree("tree_container");
+
+    tree2.data.load("data/treeData2.json").then(function() {
+        lay2.getCell("sidebar2").attach(tree2);
+        lay2.cell("sidebar2").collapse();
+    });
+
+
+    tabbar.cell("timetable").attach(lay2);
+    lay2.cell("content2").attach(scheduler);
+    lay2.cell("sidebar2").attach(tree2);
+    var toolbar1 = new dhx.Toolbar("toolbar", {
+			css: "dhx_widget--bordered dhx_widget--bg_gray"
+		});
+		toolbar1.data.load("data/toolBardata.json");
+		reserveMtr.getCell("toolbar1").attach(toolbar1);
+    
+	
+            
+
+    </script>
+<!--    <section>
+        <div class="calendar"></div>
+        <div class="realtime-info"></div>
+    </section> 
+     var scheduler1= new scheduler(null);
+         scheduler1.config.readonly = true;
+			scheduler1.init('scheduler_here',new Date(2018,0,1),"week");
+			scheduler1.load("../scheduler/samples/common/events.json"); !-->
+</body>
+</html>

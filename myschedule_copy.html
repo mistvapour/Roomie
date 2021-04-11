@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>用户界面</title>
+
+    <link href="css/jquery-ui.css" rel="stylesheet" />
+    <link href="css/jquery.ui.theme.css" rel="stylesheet" />
+    <link href="css/timelineScheduler.css" rel="stylesheet" />
+    <link href="css/timelineScheduler.styling.css" rel="stylesheet" />
+ 
+    <script src="js/moment.min.js"></script>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/jquery-ui-1.10.2.min.js"></script>
+    
+    <script type="text/javascript" src="dhtmlx/codebase/suite.js?v=6.4.1"></script>
+    <link rel="stylesheet" href="dhtmlx/codebase/suite.css?v=6.4.1">
+
+	<script src='dhtmlx/scheduler_5.3.7_commercial/codebase/dhtmlxscheduler.js?v=5.3.7' type="text/javascript" charset="utf-8"></script>
+	<script src='dhtmlx/scheduler_5.3.7_commercial/codebase/ext/dhtmlxscheduler_timeline.js?v=5.3.7' type="text/javascript" charset="utf-8"></script>
+	<script src='dhtmlx/scheduler_5.3.7_commercial/codebase/ext/dhtmlxscheduler_tooltip.js?v=5.3.7' type="text/javascript" charset="utf-8"></script>
+
+	<link rel='stylesheet' type='text/css' href='dhtmlx/scheduler_5.3.7_commercial/codebase/dhtmlxscheduler_material.css?v=5.3.7'>
+	<script type="text/javascript" charset="utf-8">
+		function init() {
+			
+         var reserveMtr = new dhx.Layout("layout",{//test
+            css: "dhx_layout-cell--bordered",
+            cols: [
+                {
+                    id: "sidebar1",
+                    collapsable: "true",
+                    header: "华东师范大学",//所属机构名
+                    gravity: false,
+                    css: "dhx_layout-cell--border_right",
+                    width: "15%",
+                    height:"580px"
+                },
+                {
+                	rows:[
+                	    {
+                	    	id: "toolbar1",
+                	    	css: "dhx_layout-cell--border_left",
+                	    	
+                	    },
+                	    {
+                	    	id: "scheduler",
+		                    css: "dhx_layout-cell--border_left",
+		                    width: "auto",
+							height: "580px",
+							html:"<div></div>",
+		                    gravity:false
+                	    }
+                	]
+                },
+            ]
+        });
+       
+        var tree = new dhx.Tree(null);
+
+        tree.data.load("/data/treeData.json").then(function() {
+             
+			reserveMtr.cell("sidebar1").collapse();
+			
+		});
+		
+
+        
+        reserveMtr.getCell("sidebar1").attach(tree);
+        var toolbar1 = new dhx.Toolbar(null, {
+			css: "dhx_widget--bordered dhx_widget--bg_gray"
+		});
+		toolbar1.data.load("/data/toolBardata.json");
+        reserveMtr.getCell("toolbar1").attach(toolbar1);
+        
+        	scheduler.attachEvent("onSchedulerReady", function () {
+				requestAnimationFrame(function(){
+
+					scheduler.createTimelineView({
+						name:	"timeline",
+						x_unit:	"minute",
+						x_date:	"%H:%i",
+						x_step:	30,
+						x_size: 24,
+						x_start: 16,
+						x_length:	48,
+						y_unit:	sections,
+						y_property:	"section_id",
+						render:"bar"
+					});
+					
+					scheduler.locale.labels.timeline_tab = "Timeline";
+					scheduler.locale.labels.section_custom="Section";
+					scheduler.config.details_on_create=true;
+					scheduler.config.details_on_dblclick=true;
+
+					var timeline = scheduler.matrix.timeline;
+					scheduler.setCurrentView(new Date(), "timeline");
+					//var timeline = scheduler.getView(); 
+			 
+					//timeline.x_size = 8;
+					//scheduler.setCurrentView();
+					scheduler.load("source/scheduler.php");
+					
+				});
+				
+			});
+			reserveMtr.getCell("scheduler").attach(scheduler);
+					
+
+			//===============
+			// Timeline configuration
+			//===============
+			
+			var sections=[
+				{key:1, label:"B517"},
+				{key:2, label:"B316"},
+				{key:3, label:"A211"},
+				{key:4, label:"A342"}
+			];
+			/*tree.events.on("ItemDblClick", function(id, e){
+			var orgid=id;
+
+			$.ajax({
+				url:"/source/getSection.php",
+				type:"post",
+				data:{
+					id:orgid
+				},
+				success: function(msg){
+				
+				var data='';
+				if(msg!=''){
+					eval("data = "+msg);    //将返回的json数据进行解析，并赋给data
+				}
+				console.log(data);    //控制台输出
+
+				$.getJSON("/source/getSection.json",function(result){
+					sections=result;
+				});
+				}
+			});
+		});*/
+
+		/*
+		tree.events.on("itemClick",function(id,e){
+			$.get("source/scheduler.php", function(data) {
+                     scheduler.load("source/scheduler.php");
+			});
+		});*/
+
+			//===============
+			// Data loading
+			//===============
+			scheduler.config.lightbox.sections=[
+			    {name:"itemName", height:130, map_to:"text", type:"textarea" , focus:true},
+				{name:"applicant", height:130, map_to:"holder", type:"textarea" , focus:true},
+				{name:"custom", height:23, type:"select", options:sections, map_to:"section_id" },
+				{name:"time", height:72, type:"time", map_to:"auto"}
+			];
+
+			//scheduler.init("scheduler",new Date(),"timeline");
+
+			scheduler.config.buttons_left = ["dhx_delete_btn","dhx_cancel_btn"];
+			scheduler.config.buttons_right = ["scd_save_btn"];
+			scheduler.locale.labels["scd_save_btn"]="SAVE";
+
+			function save_form() {
+				var ev = scheduler.getEvent(scheduler.getState().lightbox_id);
+				scheduler.updateEvent(ev.id);
+				$.ajax({
+				    url:"/source/reservationdata.php",
+				    type:"GET",
+				    data:{x:"213",y:"abc"},
+				    error:function(data){
+				        alert("ok");
+				        
+				    },
+				    success:function(data){
+				        console.log("POST");
+				        for(var i in data){
+				            console.log(data[i]);                
+				        }
+				    }
+				});
+
+			}
+
+			function close_form(){
+				scheduler.endLightbox(true,null);
+			}
+
+			scheduler.attachEvent("onLightboxButton",function(button_id,node,e){
+				if(button_id=="scd_save_btn"){
+					//alert("im here");
+					save_form();
+					close_form();
+				}
+			})
+							
+		}
+	</script>
+
+</head>
+<body id="layout" onload="init();">
+</body>
+</html>
